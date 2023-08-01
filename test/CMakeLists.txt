@@ -1,0 +1,17 @@
+# add_executable(test_imgui test_imgui.cpp)
+# target_link_libraries(test_imgui imgui::imgui glfw::glfw)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# set(DATA_DIR )
+cmake_path(SET DATA_PATH NORMALIZE ${PROJECT_SOURCE_DIR}/data)
+message(STATUS "data path: ${DATA_PATH}")
+
+add_executable(test_imgui_app test_imgui.cpp)
+target_compile_definitions(test_imgui_app PRIVATE DATA_PATH="${DATA_PATH}")
+target_link_libraries(test_imgui_app PRIVATE stb::stb_image stb::stb_image_write spdlog::spdlog imgui::imgui glad::glad glfw::glfw)
+add_test(NAME TEST_IMGUI COMMAND test_imgui_app)
+
+add_executable(test_stb_app test_stb.cpp)
+target_compile_definitions(test_stb_app PRIVATE DATA_PATH="${DATA_PATH}")
+target_link_libraries(test_stb_app PRIVATE stb::stb_image stb::stb_image_write spdlog::spdlog)
+add_test(NAME TEST_STB COMMAND test_stb_app)

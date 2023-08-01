@@ -1,2 +1,2 @@
 # Lumos
-a simple ray tracer
+Illuminating Realities
