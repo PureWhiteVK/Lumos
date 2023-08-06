@@ -8,8 +8,7 @@ add_library(glfw::glfw ALIAS glfw)
 add_imgui(
   USE_STD_STRING 
   USE_FREETYPE 
-  IMGUI_DIR 
-  imgui
+  IMGUI_DIR imgui
 )
 
 set(SPDLOG_ENABLE_PCH ON CACHE INTERNAL "")
@@ -29,3 +28,12 @@ add_subdirectory(json)
 # nativefiledialog-extended
 set(NFD_BUILD_TESTS OFF CACHE INTERNAL "")
 add_subdirectory(nativefiledialog-extended)
+add_library(nfd::nfd ALIAS nfd)
+
+add_pcg_cpp(PCG_CPP_DIR pcg-cpp)
+
+set(OPENEXR_INSTALL OFF CACHE INTERNAL "")
+set(OPENEXR_INSTALL_TOOLS OFF CACHE INTERNAL "")
+set(OPENEXR_INSTALL_EXAMPLES OFF CACHE INTERNAL "")
+set(OPENEXR_BUILD_TOOLS OFF CACHE INTERNAL "")
+add_subdirectory(openexr)

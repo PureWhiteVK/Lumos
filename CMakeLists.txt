@@ -5,6 +5,8 @@ project(Lumos)
 # Define an option with default value OFF (disabled)
 option(ENABLE_TESTING "Enable testing" OFF)
 
+cmake_path(SET DATA_PATH NORMALIZE ${PROJECT_SOURCE_DIR}/data)
+
 add_subdirectory(cmake)
 add_subdirectory(extern)
 add_subdirectory(src)

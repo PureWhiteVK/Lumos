@@ -1,5 +1,0 @@
-add_library(lumos_core )
-add_library(lumos::lumos_core ALIAS lumos_core)
-set_property(TARGET lumos_core PROPERTY CXX_STANDARD 17)
-target_include_directories(lumos_core PUBLIC include PRIVATE src)
-target_link_libraries(lumos_core PUBLIC spdlog::spdlog Eigen3::Eigen nlohmann_json::nlohmann_json)

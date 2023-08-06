@@ -7,4 +7,6 @@
 /bin
 /data/**
 !.gitkeep
-!oberbilk.jpg
+!/data/oberbilk.jpg
+!/data/dragon-ao.exr
+!/data/LXGWNeoXiHeiScreen.ttf

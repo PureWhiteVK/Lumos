@@ -16,3 +16,12 @@
 [submodule "extern/nativefiledialog-extended"]
 	path = extern/nativefiledialog-extended
 	url = https://github.com/btzy/nativefiledialog-extended.git
+[submodule "extern/pcg-cpp"]
+	path = extern/pcg-cpp
+	url = https://github.com/imneme/pcg-cpp.git
+[submodule "extern/openexr"]
+	path = extern/openexr
+	url = https://github.com/AcademySoftwareFoundation/openexr.git
+[submodule "extern/oneTBB"]
+	path = extern/oneTBB
+	url = https://github.com/oneapi-src/oneTBB.git
