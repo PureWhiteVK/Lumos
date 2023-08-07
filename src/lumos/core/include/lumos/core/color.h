@@ -1,3 +1,5 @@
+#pragma once
+
 #include "lumos/core/common.h"
 
 namespace lumos {

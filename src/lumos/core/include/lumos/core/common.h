@@ -29,7 +29,7 @@
 
 namespace lumos {
 static constexpr const char *LOGGER_NAME{"lumos"};
-class runtime_error;
+class RuntimeError;
 
 template <typename Scalar, int Size,
           typename = typename std::enable_if_t<std::is_arithmetic_v<Scalar>>>
@@ -78,7 +78,7 @@ inline float clamp(float value, float min, float max) {
   return std::min(std::max(value, min), max);
 }
 
-extern std::shared_ptr<spdlog::logger>
+std::shared_ptr<spdlog::logger>
 setupLogger(const std::vector<spdlog::sink_ptr> &sinks);
-extern std::filesystem::path getDataPath(const std::filesystem::path &name);
+std::filesystem::path getDataPath(const std::filesystem::path &name);
 }; // namespace lumos

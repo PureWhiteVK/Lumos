@@ -12,42 +12,26 @@ add_testapp(
 
 add_testapp(
   ENABLE_TEST 
-  TARGET_NAME test_stb_app
-  SOURCES test_stb.cpp
-  DEPENDENCIES stb::stb_image stb::stb_image_write 
-               spdlog::spdlog
-)
-
-add_testapp(
-  ENABLE_TEST 
   TARGET_NAME test_pcg
   SOURCES test_pcg.cpp
   DEPENDENCIES pcg::pcg-cpp
 )
 
 add_testapp(
-  ENABLE_TEST 
-  TARGET_NAME test_eigen_image
-  SOURCES test_eigen_image.cpp
-  DEPENDENCIES lumos::lumos_core
-)
-
-add_testapp(
-  TARGET_NAME test_openexr
-  SOURCES test_openexr.cpp
+  TARGET_NAME test_imageio
+  SOURCES test_imageio.cpp
   DEPENDENCIES lumos::lumos_core
 )
 
 add_testapp(
   TARGET_NAME test_viewer
   SOURCES test_viewer.cpp
-  DEPENDENCIES imgui::imgui glad::glad glfw::glfw 
-               lumos::lumos_core nfd::nfd
+  DEPENDENCIES lumos::lumos_gui nfd::nfd
 )
 
 add_testapp(
   TARGET_NAME test_random_permutation
   SOURCES test_random_permutation.cpp
-  DEPENDENCIES imgui::imgui glad::glad glfw::glfw 
-               lumos::lumos_core nfd::nfd pcg::pcg-cpp
+  DEPENDENCIES lumos::lumos_core 
+               nfd::nfd pcg::pcg-cpp
 )

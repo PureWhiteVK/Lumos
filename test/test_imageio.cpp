@@ -25,7 +25,8 @@ int main() {
         {std::make_shared<spdlog::sinks::stdout_color_sink_mt>()});
     spdlog::set_level(spdlog::level::debug);
     fs::path exr_path = lumos::getDataPath("dragon-ao.exr");
-    lumos::ImageData4f exr_image = lumos::readExr(exr_path);
+    lumos::ImageData4f exr_image;
+    lumos::readExr<lumos::ImageData4f>(exr_path, &exr_image);
     DEBUG("exr_image(hxw): {}x{}", exr_image.rows(), exr_image.cols());
 
     lumos::ImageData4u8 png_image = exr_image.unaryExpr(
@@ -48,9 +49,8 @@ int main() {
                        return lumos::toUint8(lumos::toSrgb(c));
                      }));
     }
-
-    lumos::readExr(exr_path_output);
-    lumos::readPng(png_path_output);
+    lumos::readExr<lumos::ImageData4h>(exr_path_output,nullptr);
+    lumos::readPng(png_path_output,nullptr);
   } catch (const std::exception &e) {
     ERROR(fmt::format("Exception: {}", e.what()));
     return 1;
