@@ -1,7 +1,7 @@
 #include "lumos/core/color.h"
 
 namespace lumos {
-template <int Size> Color<float, Size> toSrgb(const Color<float, Size> &c) {
+template <int Size> Color<float, Size> ToSrgb(const Color<float, Size> &c) {
   Color<float, Size> result;
   for (int i = 0; i < 3; ++i) {
     float value = std::max(6.10352e-5f, c.coeff(i));
@@ -16,7 +16,7 @@ template <int Size> Color<float, Size> toSrgb(const Color<float, Size> &c) {
 }
 
 template <int Size>
-Color<float, Size> toLinearRgb(const Color<float, Size> &c) {
+Color<float, Size> ToLinearRgb(const Color<float, Size> &c) {
   Color<float, Size> result;
   for (int i = 0; i < 3; ++i) {
     float value = std::max(6.10352e-5f, c.coeff(i));
@@ -31,8 +31,8 @@ Color<float, Size> toLinearRgb(const Color<float, Size> &c) {
 }
 
 // 外部类使用的模板函数必须显式模版实例化
-template Color3f toSrgb(const Color3f &);
-template Color4f toSrgb(const Color4f &);
-template Color3f toLinearRgb(const Color3f &);
-template Color4f toLinearRgb(const Color4f &);
+template Color3f ToSrgb(const Color3f &);
+template Color4f ToSrgb(const Color4f &);
+template Color3f ToLinearRgb(const Color3f &);
+template Color4f ToLinearRgb(const Color4f &);
 } // namespace lumos

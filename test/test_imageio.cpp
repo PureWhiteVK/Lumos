@@ -21,36 +21,36 @@ void remove_exist(const fs::path &p) {
 
 int main() {
   try {
-    auto logger = lumos::setupLogger(
+    auto logger = lumos::SetupLogger(
         {std::make_shared<spdlog::sinks::stdout_color_sink_mt>()});
     spdlog::set_level(spdlog::level::debug);
-    fs::path exr_path = lumos::getDataPath("dragon-ao.exr");
+    fs::path exr_path = lumos::GetDataPath("dragon-ao.exr");
     lumos::ImageData4f exr_image;
-    lumos::readExr<lumos::ImageData4f>(exr_path, &exr_image);
+    lumos::ReadExr<lumos::ImageData4f>(exr_path, &exr_image);
     DEBUG("exr_image(hxw): {}x{}", exr_image.rows(), exr_image.cols());
 
     lumos::ImageData4u8 png_image = exr_image.unaryExpr(
-        [](auto c) { return lumos::toUint8(lumos::toSrgb(c)); });
-    lumos::savePng(lumos::getDataPath("dragon-ao.png"), png_image);
+        [](auto c) { return lumos::ToUint8(lumos::ToSrgb(c)); });
+    lumos::SavePng(lumos::GetDataPath("dragon-ao.png"), png_image);
     lumos::ImageData4h pic_4h = exr_image.unaryExpr(
-        [](const lumos::Color4f &c) { return lumos::toImfRgba(c); });
+        [](const lumos::Color4f &c) { return lumos::ToImfRgba(c); });
 
-    fs::path png_path_output = lumos::getDataPath("dragon-ao-block.png");
-    fs::path exr_path_output = lumos::getDataPath("dragon-ao-block.exr");
+    fs::path png_path_output = lumos::GetDataPath("dragon-ao-block.png");
+    fs::path exr_path_output = lumos::GetDataPath("dragon-ao-block.exr");
     remove_exist(png_path_output);
     remove_exist(exr_path_output);
     {
       int br = 200, bc = 300, bh = 108 * 2, bw = 192 * 2;
-      lumos::saveExr(exr_path_output.c_str(), exr_image.rows(),
+      lumos::SaveExr(exr_path_output.c_str(), exr_image.rows(),
                      exr_image.cols(), 200, 300,
                      exr_image.block(200, 300, bh, bw));
-      lumos::savePng(png_path_output,
+      lumos::SavePng(png_path_output,
                      exr_image.block(200, 300, bh, bw).unaryExpr([](auto c) {
-                       return lumos::toUint8(lumos::toSrgb(c));
+                       return lumos::ToUint8(lumos::ToSrgb(c));
                      }));
     }
-    lumos::readExr<lumos::ImageData4h>(exr_path_output,nullptr);
-    lumos::readPng(png_path_output,nullptr);
+    lumos::ReadExr<lumos::ImageData4h>(exr_path_output,nullptr);
+    lumos::ReadPng(png_path_output,nullptr);
   } catch (const std::exception &e) {
     ERROR(fmt::format("Exception: {}", e.what()));
     return 1;

@@ -19,13 +19,13 @@
 #define ERROR(...) LOG(error, __VA_ARGS__)
 #define FATAL(...) LOG(fatal, __VA_ARGS__)
 
-#define Epsilon 1e-4f
-#define PI 3.14159265358979323846f
-#define INV_PI 0.31830988618379067154f
-#define INV_TWOPI 0.15915494309189533577f
-#define INV_FOURPI 0.07957747154594766788f
-#define SQRT_TWO 1.41421356237309504880f
-#define INV_SQRT_TWO 0.70710678118654752440f
+constexpr float Epsilon = 1e-4f;
+constexpr float PI = 3.14159265358979323846f;
+constexpr float INV_PI = 0.31830988618379067154f;
+constexpr float INV_TWOPI = 0.15915494309189533577f;
+constexpr float INV_FOURPI = 0.07957747154594766788f;
+constexpr float SQRT_TWO = 1.41421356237309504880f;
+constexpr float INV_SQRT_TWO = 0.70710678118654752440f;
 
 namespace lumos {
 static constexpr const char *LOGGER_NAME{"lumos"};
@@ -72,13 +72,13 @@ using ImageDataView4u8 = ImageDataView<Color4u8>;
 using ImageDataView3f = ImageDataView<Color3f>;
 using ImageDataView4f = ImageDataView<Color4f>;
 
-inline float radToDeg(float value) { return value * (180.0f / PI); }
-inline float degToRad(float value) { return value * (PI / 180.0f); }
-inline float clamp(float value, float min, float max) {
+inline float RadToDeg(float value) { return value * (180.0f / PI); }
+inline float DegToRad(float value) { return value * (PI / 180.0f); }
+inline float Clamp(float value, float min, float max) {
   return std::min(std::max(value, min), max);
 }
 
 std::shared_ptr<spdlog::logger>
-setupLogger(const std::vector<spdlog::sink_ptr> &sinks);
-std::filesystem::path getDataPath(const std::filesystem::path &name);
+SetupLogger(const std::vector<spdlog::sink_ptr> &sinks);
+std::filesystem::path GetDataPath(const std::filesystem::path &name);
 }; // namespace lumos

@@ -1,10 +1,7 @@
 #pragma once
 
-#include "lumos/core/common.h"
 #include "lumos/gui/common.h"
 #include "lumos/core/vector.h"
-
-#include <glad/gl.h>
 
 namespace lumos {
 namespace gui {

@@ -12,7 +12,7 @@
 #include <type_traits>
 
 namespace lumos {
-void readPng(const std::filesystem::path &input, ImageData4u8 *output) {
+void ReadPng(const std::filesystem::path &input, ImageData4u8 *output) {
   DEBUG("read png file: {}", input);
   int height, width, channels;
   std::unique_ptr<uint8_t, std::function<void(void *)>> data_handle(
@@ -45,7 +45,7 @@ void readPng(const std::filesystem::path &input, ImageData4u8 *output) {
 // }
 
 template <typename T>
-void readExr(const std::filesystem::path &input, T *output) {
+void ReadExr(const std::filesystem::path &input, T *output) {
   DEBUG("read exr file: {}", input);
   Imf::RgbaInputFile file(input.c_str());
   // support for Cropped image reading and writing
@@ -61,14 +61,14 @@ void readExr(const std::filesystem::path &input, T *output) {
   if constexpr (std::is_same_v<T, ImageData4h>) {
     *output = std::move(pixels);
   } else if constexpr (std::is_same_v<T, ImageData4f>) {
-    *output = pixels.unaryExpr([](const Imf::Rgba &c) { return toColor4f(c); });
+    *output = pixels.unaryExpr([](const Imf::Rgba &c) { return ToColor4f(c); });
   } else if constexpr (std::is_same_v<T, ImageData4u8>) {
     *output = pixels.unaryExpr(
-        [](const Imf::Rgba &c) { return toUint8(toSrgb(toColor4f(c))); });
+        [](const Imf::Rgba &c) { return ToUint8(ToSrgb(ToColor4f(c))); });
   }
 }
 
-void savePng(const std::filesystem::path &output, const ImageData4u8 &pic) {
+void SavePng(const std::filesystem::path &output, const ImageData4u8 &pic) {
   DEBUG("save png file: {}", output);
   int success =
       stbi_write_png(output.c_str(), pic.cols(), pic.rows(), 4, pic.data(), 0);
@@ -77,22 +77,22 @@ void savePng(const std::filesystem::path &output, const ImageData4u8 &pic) {
   }
 }
 
-void saveExr(const std::filesystem::path &output, const ImageData4f &pic) {
+void SaveExr(const std::filesystem::path &output, const ImageData4f &pic) {
   DEBUG("save exr file: {}", output);
   ImageData4h pic_4h =
-      pic.unaryExpr([](const Color4f &c) { return toImfRgba(c); });
+      pic.unaryExpr([](const Color4f &c) { return ToImfRgba(c); });
   Imf::RgbaOutputFile file(output.c_str(), pic.cols(), pic.rows(),
                            Imf::WRITE_RGBA);
   file.setFrameBuffer(pic_4h.data(), 1, pic_4h.cols());
   file.writePixels(pic_4h.rows());
 }
 
-void saveExr(const std::filesystem::path &output, int display_height,
+void SaveExr(const std::filesystem::path &output, int display_height,
              int display_width, int row_offset, int col_offset,
              const ImageData4f &block) {
   DEBUG("save exr file (sub): {}", output);
   lumos::ImageData4h block_data =
-      block.unaryExpr([](const Color4f &c) { return lumos::toImfRgba(c); });
+      block.unaryExpr([](const Color4f &c) { return lumos::ToImfRgba(c); });
   int dw_width = block.cols();
   int dw_height = block.rows();
   Imath::Box2i display_window{{0, 0}, {display_width - 1, display_height - 1}};
@@ -107,10 +107,10 @@ void saveExr(const std::filesystem::path &output, int display_height,
   file.writePixels(dw_height);
 }
 
-template void readExr<ImageData4h>(const std::filesystem::path &,
+template void ReadExr<ImageData4h>(const std::filesystem::path &,
                                    ImageData4h *);
-template void readExr<ImageData4f>(const std::filesystem::path &,
+template void ReadExr<ImageData4f>(const std::filesystem::path &,
                                    ImageData4f *);
-template void readExr<ImageData4u8>(const std::filesystem::path &,
+template void ReadExr<ImageData4u8>(const std::filesystem::path &,
                                     ImageData4u8 *);
 } // namespace lumos

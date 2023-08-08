@@ -1,7 +1,6 @@
 add_library(lumos_core 
   src/common.cpp
   src/color.cpp
-  src/vector.cpp
   src/imageio.cpp
 )
 add_library(lumos::lumos_core ALIAS lumos_core)

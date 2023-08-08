@@ -3,6 +3,7 @@ src/common.cpp
 src/context.cpp
 src/imgui_utils.cpp
 src/texture.cpp
+src/raii.cpp
 )
 add_library(lumos::lumos_gui ALIAS lumos_gui)
 target_include_directories(lumos_gui PUBLIC include)

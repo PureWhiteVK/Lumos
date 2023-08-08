@@ -48,7 +48,7 @@ void Texture::createTexture() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA,
                GL_UNSIGNED_BYTE, nullptr);
-  checkOpenGLErrors();
+  CheckOpenGLErrors();
 }
 
 void Texture::resize(int width, int height) {
@@ -72,7 +72,7 @@ void Texture::update(const ImageData4u8 &data, Vector2i offset) {
                   GL_RGBA,          // format
                   GL_UNSIGNED_BYTE, // type
                   data.data());     // pixels
-  checkOpenGLErrors();
+  CheckOpenGLErrors();
 }
 } // namespace gui
 } // namespace lumos

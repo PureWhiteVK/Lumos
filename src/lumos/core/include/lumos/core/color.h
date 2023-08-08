@@ -35,16 +35,16 @@ public:
   const Scalar &b() const { return this->Base::z(); }
   const Scalar &a() const { return this->Base::w(); }
 };
-template <int Size> Color<float, Size> toSrgb(const Color<float, Size> &c);
-template <int Size> Color<float, Size> toLinearRgb(const Color<float, Size> &c);
+template <int Size> Color<float, Size> ToSrgb(const Color<float, Size> &c);
+template <int Size> Color<float, Size> ToLinearRgb(const Color<float, Size> &c);
 
 template <typename Scalar>
-inline Color<Scalar, 3> toColor3(const Color<Scalar, 4> &c) {
+inline Color<Scalar, 3> ToColor3(const Color<Scalar, 4> &c) {
   return {c.r(), c.g(), c.b()};
 }
 
 template <typename Scalar>
-inline Color<Scalar, 4> toColor4(const Color<Scalar, 3> &c) {
+inline Color<Scalar, 4> ToColor4(const Color<Scalar, 3> &c) {
   if constexpr (std::is_same_v<Scalar, uint8_t>) {
     return {c.r(), c.g(), c.b(), static_cast<Scalar>(255)};
   } else {
@@ -53,27 +53,27 @@ inline Color<Scalar, 4> toColor4(const Color<Scalar, 3> &c) {
 }
 
 template <int Size>
-inline Color<uint8_t, Size> toUint8(const Color<float, Size> &c) {
+inline Color<uint8_t, Size> ToUint8(const Color<float, Size> &c) {
   if constexpr (Size == 3) {
     return {
         // [0,1] ~ [0,255]
-        static_cast<uint8_t>(clamp(c.r(), 0.0f, 1.0f) * 255.0f),
-        static_cast<uint8_t>(clamp(c.g(), 0.0f, 1.0f) * 255.0f),
-        static_cast<uint8_t>(clamp(c.b(), 0.0f, 1.0f) * 255.0f),
+        static_cast<uint8_t>(Clamp(c.r(), 0.0f, 1.0f) * 255.0f),
+        static_cast<uint8_t>(Clamp(c.g(), 0.0f, 1.0f) * 255.0f),
+        static_cast<uint8_t>(Clamp(c.b(), 0.0f, 1.0f) * 255.0f),
     };
   } else {
     return {
         // [0,1] ~ [0,255]
-        static_cast<uint8_t>(clamp(c.r(), 0.0f, 1.0f) * 255.0f),
-        static_cast<uint8_t>(clamp(c.g(), 0.0f, 1.0f) * 255.0f),
-        static_cast<uint8_t>(clamp(c.b(), 0.0f, 1.0f) * 255.0f),
-        static_cast<uint8_t>(clamp(c.a(), 0.0f, 1.0f) * 255.0f),
+        static_cast<uint8_t>(Clamp(c.r(), 0.0f, 1.0f) * 255.0f),
+        static_cast<uint8_t>(Clamp(c.g(), 0.0f, 1.0f) * 255.0f),
+        static_cast<uint8_t>(Clamp(c.b(), 0.0f, 1.0f) * 255.0f),
+        static_cast<uint8_t>(Clamp(c.a(), 0.0f, 1.0f) * 255.0f),
     };
   }
 }
 
 template <int Size>
-inline Color<float, Size> toFloat(const Color<uint8_t, Size> &c) {
+inline Color<float, Size> ToFloat(const Color<uint8_t, Size> &c) {
   if constexpr (Size == 3) {
     return {
         static_cast<float>(c.r()) / 255.0f,
@@ -90,9 +90,9 @@ inline Color<float, Size> toFloat(const Color<uint8_t, Size> &c) {
   }
 }
 
-inline Imf::Rgba toImfRgba(const Color4f &c) {
+inline Imf::Rgba ToImfRgba(const Color4f &c) {
   return {c.r(), c.g(), c.b(), c.a()};
 }
 
-inline Color4f toColor4f(const Imf::Rgba &c) { return {c.r, c.g, c.b, c.a}; }
+inline Color4f ToColor4f(const Imf::Rgba &c) { return {c.r, c.g, c.b, c.a}; }
 } // namespace lumos

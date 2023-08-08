@@ -1,6 +1,4 @@
 #include "lumos/gui/context.h"
-#include "glad/gl.h"
-#include "lumos/core/common.h"
 #include "lumos/core/exception.h"
 
 #include <GLFW/glfw3.h>
@@ -15,7 +13,7 @@ namespace lumos {
 namespace gui {
 
 void Context::glfwErrorCallback(int error, const char *description) {
-  ERROR("GLFW Error {}: {}", error, description);
+  throw RuntimeError("GLFW Error {}: {}", error, description);
 }
 
 void Context::glfwResizeCallback(GLFWwindow *window, int width, int height) {
@@ -28,12 +26,16 @@ void Context::glfwResizeCallback(GLFWwindow *window, int width, int height) {
   glfwGetWindowSize(window, &context_ptr->m_width, &context_ptr->m_height);
 }
 
-Context &Context::instance() {
+void Context::defaultRenderFunc() {
+  ImGui::ShowDemoWindow();
+}
+
+Context &Context::Instance() {
   static Context context;
   return context;
 }
 
-void Context::initialize(const char *window_title, int default_width,
+void Context::Initialize(const char *window_title, int default_width,
                          int default_height) {
   m_height = default_height;
   m_width = default_width;
@@ -101,8 +103,9 @@ void Context::initialize(const char *window_title, int default_width,
   int display_w, display_h;
   glfwGetFramebufferSize(m_window, &display_w, &display_h);
   glViewport(0, 0, display_w, display_h);
+  glEnable(GL_DEPTH_TEST);
   // io.Fonts->AddFontDefault();
-  fs::path font_path = lumos::getDataPath("LXGWNeoXiHeiScreen.ttf");
+  fs::path font_path = lumos::GetDataPath("LXGWNeoXiHeiScreen.ttf");
   ImFont *font = io.Fonts->AddFontFromFileTTF(
       font_path.c_str(), 14.0f, nullptr,
       io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
@@ -125,12 +128,13 @@ Context::~Context() {
   NFD::Quit();
 }
 
-void Context::loop(const std::function<void()> &render_func) {
+void Context::Loop(const std::function<void()> &render_func) {
   DEBUG("start render loop");
   const ImGuiIO &io = ImGui::GetIO();
   while (!glfwWindowShouldClose(m_window)) {
     glfwPollEvents();
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -139,7 +143,6 @@ void Context::loop(const std::function<void()> &render_func) {
     render_func();
 
     ImGui::Render();
-    glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
       GLFWwindow *backup_current_context = glfwGetCurrentContext();

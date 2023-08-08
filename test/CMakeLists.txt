@@ -35,3 +35,13 @@ add_testapp(
   DEPENDENCIES lumos::lumos_core 
                nfd::nfd pcg::pcg-cpp
 )
+
+find_package(glm REQUIRED)
+
+add_testapp(
+  TARGET_NAME test_gl
+  SOURCES test_gl.cpp
+  DEPENDENCIES lumos::lumos_core 
+               lumos::lumos_gui
+               glm::glm
+)

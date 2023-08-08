@@ -11,7 +11,7 @@
 #include "lumos/core/imageio.h"
 #include "lumos/gui/common.h"
 #include "lumos/gui/context.h"
-#include "lumos/gui/handle.h"
+#include "lumos/gui/raii.h"
 #include "lumos/gui/imgui_utils.h"
 #include "lumos/gui/texture.h"
 
@@ -34,20 +34,22 @@ namespace fs = std::filesystem;
 using ImageLoaderMap = std::unordered_map<
     std::string, std::function<void(const fs::path &, lumos::ImageData4u8 *)>>;
 
+
+
 // Main code
 int main() {
   try {
-    auto logger = lumos::setupLogger({});
+    auto logger = lumos::SetupLogger({});
     spdlog::set_default_logger(logger);
     spdlog::set_level(spdlog::level::debug);
-    lumos::gui::Context &context = lumos::gui::Context::instance();
+    lumos::gui::Context &context = lumos::gui::Context::Instance();
 
-    context.initialize("Test Viewer", 1280, 720);
+    context.Initialize("Test Viewer", 1280, 720);
 
     ImGuiIO &io = ImGui::GetIO();
     ImageLoaderMap image_loader_map{
-        {".png", lumos::readPng},
-        {".exr", lumos::readExr<lumos::ImageData4u8>}};
+        {".png", lumos::ReadPng},
+        {".exr", lumos::ReadExr<lumos::ImageData4u8>}};
 
     // Our state
     bool show_preview_window = false;
@@ -57,6 +59,8 @@ int main() {
     std::optional<fs::path> preview_image_path;
     lumos::ImageData4u8 image_data;
     lumos::gui::Texture texture;
+
+    
 
     auto on_image_button_click = [&]() {
       static nfdnchar_t *out_path;
@@ -176,7 +180,7 @@ int main() {
         relative_pos.x = io.MousePos.x - pos.x;
         relative_pos.y = io.MousePos.y - pos.y;
         if (show_image_tooltip) {
-          lumos::gui::imageTooltip(texture_id, relative_pos, image_size,
+          lumos::gui::ImageTooltip(texture_id, relative_pos, image_size,
                                    tint_color, boarder_color);
         }
         ImGui::End();
@@ -188,7 +192,7 @@ int main() {
       }
     };
 
-    context.loop(render_func);
+    context.Loop(render_func);
     return 0;
   } catch (std::exception &e) {
     ERROR("Exception: {}", e.what());

@@ -11,7 +11,7 @@
 namespace lumos {
 
 std::shared_ptr<spdlog::logger>
-setupLogger(const std::vector<spdlog::sink_ptr> &sinks) {
+SetupLogger(const std::vector<spdlog::sink_ptr> &sinks) {
   auto logger = spdlog::get(LOGGER_NAME);
   if (!logger) {
     if (sinks.size() > 0) {
@@ -29,7 +29,7 @@ setupLogger(const std::vector<spdlog::sink_ptr> &sinks) {
 
 namespace fs = std::filesystem;
 
-fs::path getDataPath(const fs::path &name) {
+fs::path GetDataPath(const fs::path &name) {
   static fs::path data_path{DATA_PATH};
   return data_path / name;
 }

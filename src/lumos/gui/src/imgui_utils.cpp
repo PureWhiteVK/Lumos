@@ -2,7 +2,7 @@
 
 namespace lumos {
 namespace gui {
-void helpMarker(const char *desc) {
+void HelpMarker(const char *desc) {
   ImGui::TextDisabled("(?)");
   if (ImGui::BeginItemTooltip()) {
     ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
@@ -12,7 +12,7 @@ void helpMarker(const char *desc) {
   }
 }
 
-void imageTooltip(ImTextureID texture_id, const ImVec2 &relateive_pos,
+void ImageTooltip(ImTextureID texture_id, const ImVec2 &relateive_pos,
                   const ImVec2 &image_size, const ImVec4 &tint_color,
                   const ImVec4 &boarder_color) {
   const ImGuiIO &io = ImGui::GetIO();
