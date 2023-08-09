@@ -74,7 +74,8 @@ using ImageDataView4f = ImageDataView<Color4f>;
 
 inline float RadToDeg(float value) { return value * (180.0f / PI); }
 inline float DegToRad(float value) { return value * (PI / 180.0f); }
-inline float Clamp(float value, float min, float max) {
+
+template <typename T> inline T Clamp(T value, T min, T max) {
   return std::min(std::max(value, min), max);
 }
 

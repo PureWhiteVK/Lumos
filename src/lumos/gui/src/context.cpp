@@ -16,16 +16,6 @@ void Context::glfwErrorCallback(int error, const char *description) {
   throw RuntimeError("GLFW Error {}: {}", error, description);
 }
 
-void Context::glfwResizeCallback(GLFWwindow *window, int width, int height) {
-  glViewport(0, 0, width, height);
-  Context *context_ptr =
-      reinterpret_cast<Context *>(glfwGetWindowUserPointer(window));
-  if (!context_ptr) {
-    return;
-  }
-  glfwGetWindowSize(window, &context_ptr->m_width, &context_ptr->m_height);
-}
-
 void Context::defaultRenderFunc() {
   ImGui::ShowDemoWindow();
 }
@@ -65,8 +55,6 @@ void Context::Initialize(const char *window_title, int default_width,
   }
 
   glfwSwapInterval(1);
-  glfwSetFramebufferSizeCallback(m_window, glfwResizeCallback);
-  glfwSetWindowUserPointer(m_window, this);
 
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
@@ -100,9 +88,6 @@ void Context::Initialize(const char *window_title, int default_width,
   ImGui_ImplGlfw_InitForOpenGL(m_window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  int display_w, display_h;
-  glfwGetFramebufferSize(m_window, &display_w, &display_h);
-  glViewport(0, 0, display_w, display_h);
   glEnable(GL_DEPTH_TEST);
   // io.Fonts->AddFontDefault();
   fs::path font_path = lumos::GetDataPath("LXGWNeoXiHeiScreen.ttf");
@@ -132,9 +117,17 @@ void Context::Loop(const std::function<void()> &render_func) {
   DEBUG("start render loop");
   const ImGuiIO &io = ImGui::GetIO();
   while (!glfwWindowShouldClose(m_window)) {
+    // Poll and handle events (inputs, window resize, etc.)
+    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to
+    // tell if dear imgui wants to use your inputs.
+    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to
+    // your main application, or clear/overwrite your copy of the mouse data.
+    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input
+    // data to your main application, or clear/overwrite your copy of the
+    // keyboard data. Generally you may always pass all inputs to dear imgui,
+    // and hide them from your application based on those two flags.
     glfwPollEvents();
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -142,14 +135,26 @@ void Context::Loop(const std::function<void()> &render_func) {
 
     render_func();
 
+    // Rendering
     ImGui::Render();
+    int display_w, display_h;
+    glfwGetFramebufferSize(m_window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    // Update and Render additional Platform Windows
+    // (Platform functions may change the current OpenGL context, so we
+    // save/restore it to make it easier to paste this code elsewhere.
+    //  For this specific demo app we could also call
+    //  glfwMakeContextCurrent(window) directly)
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
       GLFWwindow *backup_current_context = glfwGetCurrentContext();
       ImGui::UpdatePlatformWindows();
       ImGui::RenderPlatformWindowsDefault();
       glfwMakeContextCurrent(backup_current_context);
     }
+
     glfwSwapBuffers(m_window);
   }
 }

@@ -12,6 +12,8 @@ namespace gui {
 
 const std::string &GetErrorTypeName(GLenum error_type);
 
+const std::string &GetTypeName(GLenum type);
+
 #define CheckOpenGLErrors() \
   do { \
     const GLenum error_type = glGetError(); \

@@ -31,7 +31,6 @@ private:
   Context() = default;
 
   static void glfwErrorCallback(int error, const char *description);
-  static void glfwResizeCallback(GLFWwindow *window, int width, int height);
   static void defaultRenderFunc();
 
 private:
