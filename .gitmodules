@@ -25,3 +25,6 @@
 [submodule "extern/oneTBB"]
 	path = extern/oneTBB
 	url = https://github.com/oneapi-src/oneTBB.git
+[submodule "extern/Imath"]
+	path = extern/Imath
+	url = https://github.com/AcademySoftwareFoundation/Imath.git

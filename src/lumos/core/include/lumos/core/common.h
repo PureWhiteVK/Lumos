@@ -28,11 +28,10 @@ constexpr float SQRT_TWO = 1.41421356237309504880f;
 constexpr float INV_SQRT_TWO = 0.70710678118654752440f;
 
 namespace lumos {
-static constexpr const char *LOGGER_NAME{"lumos"};
+static constexpr const char *LOGGER_NAME = "lumos";
 class RuntimeError;
 
-template <typename Scalar, int Size,
-          typename = typename std::enable_if_t<std::is_arithmetic_v<Scalar>>>
+template <typename Scalar, int Size>
 class Vector;
 using Vector2i = Vector<int, 2>;
 using Vector3i = Vector<int, 3>;
@@ -47,8 +46,7 @@ using Vector2d = Vector<double, 2>;
 using Vector3d = Vector<double, 3>;
 using Vector4d = Vector<double, 4>;
 
-template <typename Scalar, int Size,
-          typename = typename std::enable_if_t<std::is_arithmetic_v<Scalar>>>
+template <typename Scalar, int Size>
 class Color;
 using Color3f = Color<float, 3>;
 using Color4f = Color<float, 4>;

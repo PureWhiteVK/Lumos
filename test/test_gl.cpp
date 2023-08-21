@@ -3,7 +3,9 @@
 #include "lumos/core/exception.h"
 #include "lumos/gui/common.h"
 #include "lumos/gui/context.h"
-#include "lumos/gui/raii.h"
+#include "lumos/gui/framebuffer.h"
+#include "lumos/gui/handle.h"
+#include "lumos/gui/shader.h"
 #include "lumos/gui/texture.h"
 
 #include <exception>
@@ -21,8 +23,6 @@ TODO:
 # 需要将纯相机类和相机交互类分离开？，gui部分实现交互，然后 core
 部分就是纯相机，包含 view 和 projection matrix？
 3. camera class implementation (offline and online?)
-4. 对于需要 bind 的东西，例如 shader 和 vao 等，添加一个
-scope_binder？（RAII，离开 scope 的时候自动清除）
 */
 
 namespace gui = lumos::gui;
@@ -207,116 +207,8 @@ int main() {
     spdlog::set_level(spdlog::level::debug);
     auto &instance = gui::Context::Instance();
     instance.Initialize();
-    // try load test shader
-    static const char *cube_vertex_shader_source = R"(
-#version 330 core
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 vertexNormal;
-layout (location = 2) in vec2 textureCoord;
-uniform mat4 mvp;
-out vec3 normal;
-void main() {
-  gl_Position = mvp * vec4(position, 1.0);
-  // normal = vec3(0.5,0.5,0.5);
-  normal = vertexNormal;
-}
-)";
 
-    static const char *cube_fragment_shader_source = R"(
-#version 330 core
-in vec3 normal;
-out vec4 fragColor;
-vec4 normal_fragment_shader(vec3 n){
-  return vec4((n + vec3(1.0)) / 2.0,1.0);
-}
-void main() {
-  fragColor = normal_fragment_shader(normal);
-}
-)";
-
-    static const char *plane_vertex_shader_source = R"(
-#version 330 core
-uniform mat4 view;
-uniform mat4 proj;
-uniform mat4 view_inv;
-uniform mat4 proj_inv;
-out vec3 near_point;
-out vec3 far_point;
-// Grid position are in xy clipped space
-vec3 gridPlane[6] = vec3[](
-  vec3(1, 1, 0), vec3(-1, -1, 0), vec3(-1, 1, 0),
-  vec3(-1, -1, 0), vec3(1, 1, 0), vec3(1, -1, 0)
-);
-// normal vertice projection
-
-vec3 unproject_point(vec3 p) {
-  vec4 unprojected_p = view_inv * proj_inv * vec4(p,1.0);
-  return unprojected_p.xyz / unprojected_p.w;
-}
-
-void main() {
-  // we have to perform screen space conversion
-  // gl_Position = proj * view * vec4(gridPlane[gl_VertexID].xyz, 1.0);
-  // gl_Position = vec4(gridPlane[gl_VertexID].xyz, 1.0);
-  vec3 p = gridPlane[gl_VertexID];  
-  near_point = unproject_point(vec3(p.xy,0.0));
-  far_point  = unproject_point(vec3(p.xy,1.0));
-  gl_Position = vec4(p, 1.0);
-}
-)";
-    static const char *plane_fragment_shader_source = R"(
-#version 330 core
-uniform mat4 view;
-uniform mat4 proj;
-// can we just use camera ray ?
-in vec3 near_point;
-in vec3 far_point; 
-out vec4 frag_color;
-
-float checkers(vec2 p) {
-  vec2 q = floor(p);
-  return mod(q.x+q.y,2.);
-}
-
-vec4 grid(vec3 fragPos3D, float scale) {
-  vec2 coord = fragPos3D.xz * scale; // use the scale variable to set the distance between the lines
-  vec2 derivative = fwidth(coord);
-  vec2 grid = abs(fract(coord - 0.5) - 0.5) / derivative;
-  float line = min(grid.x, grid.y);
-  float minimumz = min(derivative.y, 1);
-  float minimumx = min(derivative.x, 1);
-  vec4 color = vec4(0.2, 0.2, 0.2, 1.0 - min(line, 1.0));
-  // z axis
-  if(fragPos3D.x > -0.1 * minimumx && fragPos3D.x < 0.1 * minimumx)
-      color.z = 1.0;
-  // x axis
-  if(fragPos3D.z > -0.1 * minimumz && fragPos3D.z < 0.1 * minimumz)
-      color.x = 1.0;
-  return color;
-}
-
-void main() {
-  // screen space reconstruction
-  // the normal for xz plane is y (0,1,0)
-  // 此处计算直线和平面的交点？
-  float t = -near_point.y / (far_point.y - near_point.y);
-  // 带入直线参数方程求出交点？
-  vec3 p = near_point + t * (far_point - near_point);
-  // 此时的 p 就对应于 xz 平面上的一点
-  vec4 ndc_p = proj * view * vec4(p,1.0);
-  gl_FragDepth = ndc_p.z / ndc_p.w;
-  frag_color = vec4( vec3(0.2,0.4,0.8) * checkers(p.xz)  ,t > 0.0 ? 1.0 : 0.0);
-  // frag_color = grid(p, 5) * float(t > 0);
-  // assume depth value in 0~1
-  // float ndc = gl_FragDepth * 2.0 - 1.0;
-  // float near = 0.1;
-  // float far = 100.0;
-  // float linear_depth = (2.0 * near * far) / (far + near - ndc * (far - near));
-  // frag_color = vec4(vec3(linear_depth), 1.0);
-}
-  )";
-
-  // TODO: 再画一个 xz 平面，对比 screen space 重建出来的效果
+    // TODO: 再画一个 xz 平面，对比 screen space 重建出来的效果
 
     IndexBuffer cube_indices{
         {0, 1, 2},    {2, 3, 0},    // v0-v1-v2, v2-v3-v0 (front)
@@ -355,67 +247,8 @@ void main() {
         {.5f, .5f, -.5f, 0.0f, 0.0f, -1.0f}, // v4,v7,v6,v5 (back)
     };
 
-    gui::ProgramHandle cube_shader = glCreateProgram();
-    {
-      gui::ShaderHandle vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-      glShaderSource(vertex_shader, 1, &cube_vertex_shader_source, nullptr);
-      glCompileShader(vertex_shader);
-      gui::CheckOpenGLShaderErrors(vertex_shader);
-      gui::ShaderHandle fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-      glShaderSource(fragment_shader, 1, &cube_fragment_shader_source, nullptr);
-      glCompileShader(fragment_shader);
-      gui::CheckOpenGLShaderErrors(fragment_shader);
-      glAttachShader(cube_shader, vertex_shader);
-      glAttachShader(cube_shader, fragment_shader);
-      glLinkProgram(cube_shader);
-      gui::CheckOpenGLProgramErrors(cube_shader);
-      // we can get some program info here
-      {
-        // get shader uniform info
-        GLint num_active_uniforms;
-        glGetProgramiv(cube_shader, GL_ACTIVE_UNIFORMS, &num_active_uniforms);
-        DEBUG("#active uniforms: {}", num_active_uniforms);
-        GLsizei BUFFER_SIZE;
-        glGetProgramiv(cube_shader, GL_ACTIVE_UNIFORM_MAX_LENGTH, &BUFFER_SIZE);
-        std::vector<char> name_buffer;
-        name_buffer.reserve(BUFFER_SIZE);
-        // TODO: we can save uniform data to perform sanity check here!
-        for (int i = 0; i < num_active_uniforms; i++) {
-          GLsizei actual_length;
-          GLint uniform_size;
-          GLenum uniform_type;
-          glGetActiveUniform(cube_shader, i, BUFFER_SIZE, &actual_length,
-                             &uniform_size, &uniform_type, name_buffer.data());
-          DEBUG("active uniform [{}] name: {}, size: {}, type: {}", i,
-                name_buffer.data(), uniform_size,
-                gui::GetTypeName(uniform_type));
-        }
-      }
-      {
-        // get shader attribute info
-        GLint num_active_attributes;
-        glGetProgramiv(cube_shader, GL_ACTIVE_ATTRIBUTES,
-                       &num_active_attributes);
-        DEBUG("#active attributes: {}", num_active_attributes);
-        GLsizei BUFFER_SIZE;
-        glGetProgramiv(cube_shader, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH,
-                       &BUFFER_SIZE);
-        std::vector<char> name_buffer;
-        name_buffer.reserve(BUFFER_SIZE);
-        // TODO: we can save uniform data to perform sanity check here!
-        for (int i = 0; i < num_active_attributes; i++) {
-          GLsizei actual_length;
-          GLint attribute_size;
-          GLenum attribute_type;
-          glGetActiveAttrib(cube_shader, i, BUFFER_SIZE, &actual_length,
-                            &attribute_size, &attribute_type,
-                            name_buffer.data());
-          DEBUG("active attribute [{}] name: {}, size: {}, type: {}", i,
-                name_buffer.data(), attribute_size,
-                gui::GetTypeName(attribute_type));
-        }
-      }
-    }
+    gui::DrawProgram cube_shader(lumos::GetDataPath("test_gl/cube.vert"),
+                                 lumos::GetDataPath("test_gl/cube.frag"));
 
     gui::VertexArrayHandle cube_vao;
     gui::BufferHandle cube_vbo, cube_ebo;
@@ -455,126 +288,27 @@ void main() {
       glBindVertexArray(0);
     }
 
-    gui::ProgramHandle plane_shader = glCreateProgram();
-    {
-      gui::ShaderHandle vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-      glShaderSource(vertex_shader, 1, &plane_vertex_shader_source, nullptr);
-      glCompileShader(vertex_shader);
-      gui::CheckOpenGLShaderErrors(vertex_shader);
-      gui::ShaderHandle fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-      glShaderSource(fragment_shader, 1, &plane_fragment_shader_source,
-                     nullptr);
-      glCompileShader(fragment_shader);
-      gui::CheckOpenGLShaderErrors(fragment_shader);
-      glAttachShader(plane_shader, vertex_shader);
-      glAttachShader(plane_shader, fragment_shader);
-      glLinkProgram(plane_shader);
-      gui::CheckOpenGLProgramErrors(plane_shader);
-      // we can get some program info here
-      {
-        // get shader uniform info
-        GLint num_active_uniforms;
-        glGetProgramiv(plane_shader, GL_ACTIVE_UNIFORMS, &num_active_uniforms);
-        DEBUG("#active uniforms: {}", num_active_uniforms);
-        GLsizei BUFFER_SIZE;
-        glGetProgramiv(plane_shader, GL_ACTIVE_UNIFORM_MAX_LENGTH,
-                       &BUFFER_SIZE);
-        std::vector<char> name_buffer;
-        name_buffer.reserve(BUFFER_SIZE);
-        // TODO: we can save uniform data to perform sanity check here!
-        for (int i = 0; i < num_active_uniforms; i++) {
-          GLsizei actual_length;
-          GLint uniform_size;
-          GLenum uniform_type;
-          glGetActiveUniform(plane_shader, i, BUFFER_SIZE, &actual_length,
-                             &uniform_size, &uniform_type, name_buffer.data());
-          DEBUG("active uniform [{}] name: {}, size: {}, type: {}", i,
-                name_buffer.data(), uniform_size,
-                gui::GetTypeName(uniform_type));
-        }
-      }
-      {
-        // get shader attribute info
-        GLint num_active_attributes;
-        glGetProgramiv(plane_shader, GL_ACTIVE_ATTRIBUTES,
-                       &num_active_attributes);
-        DEBUG("#active attributes: {}", num_active_attributes);
-        GLsizei BUFFER_SIZE;
-        glGetProgramiv(plane_shader, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH,
-                       &BUFFER_SIZE);
-        std::vector<char> name_buffer;
-        name_buffer.reserve(BUFFER_SIZE);
-        // TODO: we can save uniform data to perform sanity check here!
-        for (int i = 0; i < num_active_attributes; i++) {
-          GLsizei actual_length;
-          GLint attribute_size;
-          GLenum attribute_type;
-          glGetActiveAttrib(plane_shader, i, BUFFER_SIZE, &actual_length,
-                            &attribute_size, &attribute_type,
-                            name_buffer.data());
-          DEBUG("active attribute [{}] name: {}, size: {}, type: {}", i,
-                name_buffer.data(), attribute_size,
-                gui::GetTypeName(attribute_type));
-        }
-      }
-    }
+    gui::DrawProgram plane_shader(lumos::GetDataPath("test_gl/plane.vert"),
+                                  lumos::GetDataPath("test_gl/plane.frag"));
 
     gui::VertexArrayHandle plane_vao;
     {
-      // generate empty plane_vao?
+      // generate empty plane_vao (to clear out data bind)
       glGenVertexArrays(1, plane_vao.Ptr());
     }
 
-    int framebuffer_width = 800;
-    int framebuffer_height = 600;
-    // create rgb texture here
-    gui::Texture framebuffer_color_texture(framebuffer_width,
-                                           framebuffer_height);
-    gui::RenderBufferHandle framebuffer_depth_buffer;
-    gui::FrameBufferHandle fbo;
-    {
-      glGenFramebuffers(1, fbo.Ptr());
-      glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-      // Attach 2D texture to this FBO
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                             GL_TEXTURE_2D, framebuffer_color_texture, 0);
-      //-------------------------
-      DEBUG("bind depth texture");
-      glGenRenderbuffers(1, framebuffer_depth_buffer.Ptr());
-      glBindRenderbuffer(GL_RENDERBUFFER, framebuffer_depth_buffer);
-      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24,
-                            framebuffer_width, framebuffer_height);
-      //-------------------------
-      // Attach depth buffer to FBO
-      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                GL_RENDERBUFFER, framebuffer_depth_buffer);
-      // sanity check
-      GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-      if (status != GL_FRAMEBUFFER_COMPLETE) {
-        throw lumos::RuntimeError("failed to setup frame buffer");
-      }
-      CheckOpenGLErrors();
-    }
-
     // view
-    ArcballCamera camera =
-        ArcballCamera(glm::vec3{0.0f, 0.0f, -10.0f}, glm::vec3{0.0f, 1.0f, 0.0f});
+    ArcballCamera camera = ArcballCamera(glm::vec3{0.0f, 0.0f, -10.0f},
+                                         glm::vec3{0.0f, 1.0f, 0.0f});
 
-    // projection
-    glm::mat4 projection =
-        glm::perspective(glm::radians<float>(45.0f),
-                         static_cast<float>(framebuffer_width) /
-                             static_cast<float>(framebuffer_height),
-                         0.1f, 100.0f);
-    glm::mat4 projection_inv = glm::inverse(projection);
     // model will change with time?
     ImGuiIO &io = ImGui::GetIO();
     ImVec4 c{0.3f, 0.2f, 0.1f, 1.0f};
 
     glm::vec3 center{0.0f, 0.0f, 0.0f};
 
-    const unsigned int CENTER_X = instance.width() / 2;
-    const unsigned int CENTER_Y = instance.height() / 2;
+    const unsigned int CENTER_X = instance.Width() / 2;
+    const unsigned int CENTER_Y = instance.Height() / 2;
 
     ImVec2 window_pos;
     ImVec2 prev_pos;
@@ -588,8 +322,31 @@ void main() {
     bool activate_arcball = false;
     bool item_hovered = false;
     bool draw_cube = false;
+    bool draw_plane = false;
 
     auto v = camera.view * camera.viewInverse;
+
+    glEnable(GL_DEPTH_TEST);
+
+    int framebuffer_width = 800;
+    int framebuffer_height = 600;
+    // gui::FrameBuffer frame_buffer(framebuffer_width, framebuffer_height,
+    //                               GL_DEPTH_COMPONENT24);
+
+    // projection
+    glm::mat4 projection =
+        glm::perspective(glm::radians<float>(45.0f),
+                         static_cast<float>(framebuffer_width) /
+                             static_cast<float>(framebuffer_height),
+                         0.1f, 100.0f);
+    glm::mat4 projection_inv = glm::inverse(projection);
+
+    int msaa_samples_bits = 0;
+
+    gui::MsaaFrameBuffer msaa_frame_buffer(
+        framebuffer_width, framebuffer_height, GL_DEPTH_COMPONENT16,
+        1 << msaa_samples_bits);
+    gui::FrameBuffer final_frame_buffer(framebuffer_width, framebuffer_height);
 
     auto render = [&]() {
       // IO
@@ -599,10 +356,10 @@ void main() {
 
       // RENDER TO TEXTURE
       {
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glEnable(GL_DEPTH_TEST);
+        glBindFramebuffer(GL_FRAMEBUFFER, msaa_frame_buffer);
         glClearColor(c.x, c.y, c.z, c.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
         glViewport(0, 0, framebuffer_width, framebuffer_height);
 
         // draw normal cube here
@@ -617,15 +374,24 @@ void main() {
         }
 
         // draw plane here?
-        {
+        if (draw_plane) {
           glUseProgram(plane_shader);
           glBindVertexArray(plane_vao);
           gui::SetUniform(plane_shader, "view", camera.GetViewMatrix());
           gui::SetUniform(plane_shader, "proj", projection);
-          gui::SetUniform(plane_shader, "view_inv", camera.GetViewInverseMatrix());
+          gui::SetUniform(plane_shader, "view_inv",
+                          camera.GetViewInverseMatrix());
           gui::SetUniform(plane_shader, "proj_inv", projection_inv);
           glDrawArrays(GL_TRIANGLES, 0, 6);
         }
+
+        // blit result to final frame for post processing
+
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, msaa_frame_buffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, final_frame_buffer);
+        glBlitFramebuffer(0, 0, framebuffer_width, framebuffer_height, 0, 0,
+                          framebuffer_width, framebuffer_height,
+                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
@@ -643,9 +409,12 @@ void main() {
         ImGui::Checkbox("Item hoverd", &item_hovered);
         ImGui::EndDisabled();
         ImGui::Checkbox("draw cube", &draw_cube);
+        ImGui::Checkbox("draw plane", &draw_plane);
+        if (ImGui::SliderInt("MSAA samples", &msaa_samples_bits, 0, 3,
+                             fmt::format("{}", 1 << msaa_samples_bits).c_str())) {
+          msaa_frame_buffer.SetSamples(1 << msaa_samples_bits);
+        }
         ImGui::Text("Camera distance: %.2f", camera.GetCameraDistance());
-        ImGui::Text("prev pos: (%.2f,%.2f)", prev_pos.x, prev_pos.y);
-        ImGui::Text("curr pos: (%.2f,%.2f)", curr_pos.x, curr_pos.y);
         ImGui::Separator();
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
                     1000.0f / io.Framerate, io.Framerate);
@@ -657,7 +426,7 @@ void main() {
       if (ImGui::Begin("preview", nullptr, preview_window_flags)) {
         static ImTextureID texture_id;
         texture_id = reinterpret_cast<ImTextureID>(
-            static_cast<intptr_t>(framebuffer_color_texture));
+            static_cast<intptr_t>(final_frame_buffer.ColorTexture()));
 
         window_pos = ImGui::GetCursorScreenPos();
         curr_pos = {lumos::Clamp(io.MousePos.x - window_pos.x, 0.0f,
@@ -681,6 +450,7 @@ void main() {
           if (ImGui::IsKeyReleased(ImGuiKey_MouseLeft)) {
             activate_arcball = false;
           }
+          camera.Zoom(io.MouseWheel);
         } else {
           preview_window_flags = ImGuiWindowFlags_AlwaysAutoResize;
           activate_arcball = false;

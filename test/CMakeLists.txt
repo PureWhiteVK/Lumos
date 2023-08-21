@@ -38,6 +38,7 @@ add_testapp(
 
 find_package(glm REQUIRED)
 
+if(glm_FOUND)
 add_testapp(
   TARGET_NAME test_gl
   SOURCES test_gl.cpp
@@ -45,3 +46,4 @@ add_testapp(
                lumos::lumos_gui
                glm::glm
 )
+endif()

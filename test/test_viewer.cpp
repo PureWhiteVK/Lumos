@@ -11,7 +11,7 @@
 #include "lumos/core/imageio.h"
 #include "lumos/gui/common.h"
 #include "lumos/gui/context.h"
-#include "lumos/gui/raii.h"
+#include "lumos/gui/handle.h"
 #include "lumos/gui/imgui_utils.h"
 #include "lumos/gui/texture.h"
 
@@ -58,7 +58,7 @@ int main() {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     std::optional<fs::path> preview_image_path;
     lumos::ImageData4u8 image_data;
-    lumos::gui::Texture texture;
+    lumos::gui::RgbaTexture texture;
 
     
 
@@ -90,12 +90,12 @@ int main() {
         throw lumos::RuntimeError("unsupported image extension: {}", ext);
       }
       image_loader_map[ext](preview_image_path.value(), &image_data);
-      if (!texture || image_data.rows() != texture.height() ||
-          image_data.cols() != texture.width()) {
+      if (!texture || image_data.rows() != texture.Height() ||
+          image_data.cols() != texture.Width()) {
         DEBUG("texture size change!, reallocate texture");
-        texture.resize(image_data.cols(), image_data.rows());
+        texture.Resize(image_data.cols(), image_data.rows());
       }
-      texture.update(image_data);
+      texture.Update(image_data);
     };
 
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w,
@@ -168,10 +168,10 @@ int main() {
         window_padding = ImGui::GetStyle().WindowPadding;
 
         image_size.x = std::min(window_size.x - 2.0f * window_padding.x,
-                                static_cast<float>(texture.width()));
+                                static_cast<float>(texture.Width()));
 
-        image_size.y = static_cast<float>(texture.height()) /
-                       static_cast<float>(texture.width()) * image_size.x;
+        image_size.y = static_cast<float>(texture.Height()) /
+                       static_cast<float>(texture.Width()) * image_size.x;
         texture_id =
             reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture));
         pos = ImGui::GetCursorScreenPos();

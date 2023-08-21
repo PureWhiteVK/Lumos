@@ -3,7 +3,7 @@
 #include "lumos/core/common.h"
 
 namespace lumos {
-template <typename Scalar, int Size, typename>
+template <typename Scalar, int Size>
 class Color : public Eigen::Vector<Scalar, Size> {
 public:
   using Base = Eigen::Vector<Scalar, Size>;

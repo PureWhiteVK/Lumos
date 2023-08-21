@@ -16,8 +16,8 @@ public:
 
   void Loop(const std::function<void()> &render_func = defaultRenderFunc);
 
-  int width() const { return m_width; }
-  int height() const { return m_height; }
+  int Width() const { return m_width; }
+  int Height() const { return m_height; }
   operator GLFWwindow *() const { return m_window; }
 
   Context(const Context &) = delete;
