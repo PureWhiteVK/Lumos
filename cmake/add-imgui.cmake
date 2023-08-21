@@ -24,6 +24,7 @@ function(add_imgui)
   add_library(imgui::imgui ALIAS imgui)
 
   set_property(TARGET imgui PROPERTY CXX_STANDARD 17)
+  set_property(TARGET imgui PROPERTY CXX_STANDARD_REQUIRED ON)
 
   target_include_directories(imgui PUBLIC 
     ${ARGS_IMGUI_DIR}
@@ -54,20 +55,24 @@ function(add_imgui)
   endif()
   
   if ( ARGS_USE_FREETYPE )
-    message(STATUS "enable freetype for imgui")
-    find_package(Freetype REQUIRED)
-    target_sources(imgui PRIVATE 
-      ${ARGS_IMGUI_DIR}/misc/freetype/imgui_freetype.cpp
-    )
-    target_include_directories(imgui PRIVATE 
-      ${ARGS_IMGUI_DIR}/misc/freetype
-    )
-    target_link_libraries(imgui PRIVATE 
-      Freetype::Freetype
-    )
-    target_compile_definitions(imgui PRIVATE 
-      IMGUI_ENABLE_FREETYPE
-    )
+    find_package(Freetype)
+    if(Freetype_FOUND)
+      message(STATUS "enable freetype for imgui")
+      target_sources(imgui PRIVATE 
+        ${ARGS_IMGUI_DIR}/misc/freetype/imgui_freetype.cpp
+      )
+      target_include_directories(imgui PRIVATE 
+        ${ARGS_IMGUI_DIR}/misc/freetype
+      )
+      target_link_libraries(imgui PRIVATE 
+        Freetype::Freetype
+      )
+      target_compile_definitions(imgui PRIVATE 
+        IMGUI_ENABLE_FREETYPE
+      )
+    else()
+    message(STATUS "disable freetype for imgui")
+    endif()
   endif()
   
   list(POP_BACK CMAKE_MESSAGE_INDENT)

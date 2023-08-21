@@ -8,13 +8,17 @@ namespace lumos {
 namespace gui {
 void DrawProgram::loadShaderFile(const std::filesystem::path &path,
                                  std::string &output) {
-  std::ifstream f(path);
-  // when stream is bad or fail, throw exceptions!
-  f.exceptions(std::ios::badbit | std::ios::failbit);
-  std::stringstream s;
-  s << f.rdbuf();
-  f.close();
-  output = s.str();
+  try {
+    std::ifstream f(path);
+    // when stream is bad or fail, throw exceptions!
+    f.exceptions(std::ios::badbit | std::ios::failbit);
+    std::stringstream s;
+    s << f.rdbuf();
+    f.close();
+    output = s.str();
+  } catch (...) {
+     std::throw_with_nested( lumos::RuntimeError("failed to load shader file: {}",path.u8string()) );
+  }
 }
 
 void DrawProgram::createProgram(const std::string &vertex_shader_source,

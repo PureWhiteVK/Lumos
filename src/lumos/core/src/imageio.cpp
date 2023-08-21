@@ -5,7 +5,6 @@
 
 #include <ImfRgba.h>
 #include <ImfRgbaFile.h>
-#include <arm_neon.h>
 #include <filesystem>
 #include <stb_image.h>
 #include <stb_image_write.h>
@@ -16,7 +15,7 @@ void ReadPng(const std::filesystem::path &input, ImageData4u8 *output) {
   DEBUG("read png file: {}", input);
   int height, width, channels;
   std::unique_ptr<uint8_t, std::function<void(void *)>> data_handle(
-      stbi_load(input.c_str(), &width, &height, &channels, 4),
+      stbi_load(input.u8string().c_str(), &width, &height, &channels, 4),
       [](void *d) { stbi_image_free(d); });
   if (!data_handle) {
     throw RuntimeError("failed to read png: {}", input);
@@ -47,7 +46,7 @@ void ReadPng(const std::filesystem::path &input, ImageData4u8 *output) {
 template <typename T>
 void ReadExr(const std::filesystem::path &input, T *output) {
   DEBUG("read exr file: {}", input);
-  Imf::RgbaInputFile file(input.c_str());
+  Imf::RgbaInputFile file(input.u8string().c_str());
   // support for Cropped image reading and writing
   Imath::Box2i dw = file.dataWindow();
   int width = dw.max.x - dw.min.x + 1;
@@ -71,7 +70,7 @@ void ReadExr(const std::filesystem::path &input, T *output) {
 void SavePng(const std::filesystem::path &output, const ImageData4u8 &pic) {
   DEBUG("save png file: {}", output);
   int success =
-      stbi_write_png(output.c_str(), pic.cols(), pic.rows(), 4, pic.data(), 0);
+      stbi_write_png(output.u8string().c_str(), pic.cols(), pic.rows(), 4, pic.data(), 0);
   if (!success) {
     throw RuntimeError("failed to save png: {}", output);
   }
@@ -81,7 +80,7 @@ void SaveExr(const std::filesystem::path &output, const ImageData4f &pic) {
   DEBUG("save exr file: {}", output);
   ImageData4h pic_4h =
       pic.unaryExpr([](const Color4f &c) { return ToImfRgba(c); });
-  Imf::RgbaOutputFile file(output.c_str(), pic.cols(), pic.rows(),
+  Imf::RgbaOutputFile file(output.u8string().c_str(), pic.cols(), pic.rows(),
                            Imf::WRITE_RGBA);
   file.setFrameBuffer(pic_4h.data(), 1, pic_4h.cols());
   file.writePixels(pic_4h.rows());
@@ -99,7 +98,7 @@ void SaveExr(const std::filesystem::path &output, int display_height,
   Imath::Box2i data_window{
       {col_offset, row_offset},
       {col_offset + dw_width - 1, row_offset + dw_height - 1}};
-  Imf::RgbaOutputFile file(output.c_str(), display_window, data_window,
+  Imf::RgbaOutputFile file(output.u8string().c_str(), display_window, data_window,
                            Imf::WRITE_RGBA);
   file.setFrameBuffer(block_data.data() - data_window.min.x -
                           data_window.min.y * dw_width,

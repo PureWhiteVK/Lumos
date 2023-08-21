@@ -12,6 +12,7 @@
 
 #include <Eigen/Dense>
 #include <GLFW/glfw3.h>
+#include <filesystem>
 #include <glm/ext.hpp>
 #include <glm/glm.hpp>
 #include <imgui.h>
@@ -247,8 +248,10 @@ int main() {
         {.5f, .5f, -.5f, 0.0f, 0.0f, -1.0f}, // v4,v7,v6,v5 (back)
     };
 
-    gui::DrawProgram cube_shader(lumos::GetDataPath("test_gl/cube.vert"),
-                                 lumos::GetDataPath("test_gl/cube.frag"));
+    std::filesystem::path shader_path = std::filesystem::u8path("中文shader");
+
+    gui::DrawProgram cube_shader(lumos::GetDataPath(shader_path / "cube.vert"),
+                                 lumos::GetDataPath(shader_path / "cube.frag"));
 
     gui::VertexArrayHandle cube_vao;
     gui::BufferHandle cube_vbo, cube_ebo;
@@ -288,8 +291,9 @@ int main() {
       glBindVertexArray(0);
     }
 
-    gui::DrawProgram plane_shader(lumos::GetDataPath("test_gl/plane.vert"),
-                                  lumos::GetDataPath("test_gl/plane.frag"));
+    gui::DrawProgram plane_shader(
+        lumos::GetDataPath(shader_path / "plane.vert"),
+        lumos::GetDataPath(shader_path / "plane.frag"));
 
     gui::VertexArrayHandle plane_vao;
     {
@@ -410,8 +414,9 @@ int main() {
         ImGui::EndDisabled();
         ImGui::Checkbox("draw cube", &draw_cube);
         ImGui::Checkbox("draw plane", &draw_plane);
-        if (ImGui::SliderInt("MSAA samples", &msaa_samples_bits, 0, 3,
-                             fmt::format("{}", 1 << msaa_samples_bits).c_str())) {
+        if (ImGui::SliderInt(
+                "MSAA samples", &msaa_samples_bits, 0, 3,
+                fmt::format("{}", 1 << msaa_samples_bits).c_str())) {
           msaa_frame_buffer.SetSamples(1 << msaa_samples_bits);
         }
         ImGui::Text("Camera distance: %.2f", camera.GetCameraDistance());

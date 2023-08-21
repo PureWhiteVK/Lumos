@@ -1,5 +1,3 @@
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_definitions(DATA_PATH="${DATA_PATH}")
 
 add_testapp(
@@ -33,7 +31,7 @@ add_testapp(
   TARGET_NAME test_random_permutation
   SOURCES test_random_permutation.cpp
   DEPENDENCIES lumos::lumos_core 
-               nfd::nfd pcg::pcg-cpp
+               pcg::pcg-cpp
 )
 
 find_package(glm REQUIRED)

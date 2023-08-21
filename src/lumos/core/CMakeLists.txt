@@ -1,4 +1,4 @@
-add_library(lumos_core 
+add_library(lumos_core STATIC
   src/common.cpp
   src/color.cpp
   src/imageio.cpp

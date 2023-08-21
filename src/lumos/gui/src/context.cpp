@@ -92,10 +92,10 @@ void Context::Initialize(const char *window_title, int default_width,
   // io.Fonts->AddFontDefault();
   fs::path font_path = lumos::GetDataPath("LXGWNeoXiHeiScreen.ttf");
   ImFont *font = io.Fonts->AddFontFromFileTTF(
-      font_path.c_str(), 14.0f, nullptr,
+      font_path.u8string().c_str(), 14.0f, nullptr,
       io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
   if (!font) {
-    throw lumos::RuntimeError("failed to load font: {}", font_path.c_str());
+    throw lumos::RuntimeError("failed to load font: {}", font_path.u8string().c_str());
   }
   // init nfd
   if (NFD::Init() != NFD_OKAY) {

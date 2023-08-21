@@ -14,6 +14,7 @@
 #include "lumos/gui/handle.h"
 #include "lumos/gui/imgui_utils.h"
 #include "lumos/gui/texture.h"
+#include "nfd.h"
 
 #include <chrono>
 #include <exception>
@@ -63,10 +64,10 @@ int main() {
     
 
     auto on_image_button_click = [&]() {
-      static nfdnchar_t *out_path;
-      static nfdfilteritem_t filterItem[2] = {
-          {"Portable Network Graphics", "png"}, {"OpenEXR", "exr"}};
-      nfdresult_t nfd_result = NFD::OpenDialog(out_path, filterItem, 2);
+      // to ensure cross platform, we have to ensure usage of utf-8
+      static nfdu8char_t *out_path;
+      static std::array<nfdu8filteritem_t,2> filterItem{{{"Portable Network Graphics", "png"}, {"OpenEXR", "exr"}}};
+      nfdresult_t nfd_result = NFD::OpenDialog(out_path, filterItem.data(), 2);
       switch (nfd_result) {
       case NFD_OKAY:
         DEBUG("user select path: {}", out_path);
@@ -143,7 +144,7 @@ int main() {
         }
         if (preview_image_path.has_value()) {
           ImGui::SameLine();
-          ImGui::Text("Image: %s", preview_image_path->filename().c_str());
+          ImGui::Text("Image: %s", preview_image_path->filename().u8string().c_str());
         }
         ImGui::Checkbox("Zoom in", &show_image_tooltip);
         ImGui::Separator();
@@ -162,7 +163,7 @@ int main() {
         // 仅设置一次，这样我们可以重新调整窗口的位置，但是有一个初始的
         // docking 位置
         ImGui::SetNextWindowDockID(right_id);
-        ImGui::Begin(preview_image_path->filename().c_str(),
+        ImGui::Begin(preview_image_path->filename().u8string().c_str(),
                      &show_preview_window);
         window_size = ImGui::GetWindowSize();
         window_padding = ImGui::GetStyle().WindowPadding;

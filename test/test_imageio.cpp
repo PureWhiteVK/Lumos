@@ -3,18 +3,20 @@
 
 #include <ImfRgbaFile.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/common.h>
+#include <spdlog/spdlog.h>
+#include <spdlog/fmt/ostr.h>
 
 #include "lumos/core/color.h"
 #include "lumos/core/common.h"
 #include "lumos/core/imageio.h"
-#include "spdlog/common.h"
-#include "spdlog/spdlog.h"
+
 
 namespace fs = std::filesystem;
 
 void remove_exist(const fs::path &p) {
   if (fs::exists(p)) {
-    DEBUG("path: {} already exists, delete!", p.c_str());
+    DEBUG("path: {} already exists, delete!", p);
     fs::remove(p);
   }
 }
@@ -35,13 +37,13 @@ int main() {
     lumos::ImageData4h pic_4h = exr_image.unaryExpr(
         [](const lumos::Color4f &c) { return lumos::ToImfRgba(c); });
 
-    fs::path png_path_output = lumos::GetDataPath("dragon-ao-block.png");
-    fs::path exr_path_output = lumos::GetDataPath("dragon-ao-block.exr");
+    fs::path png_path_output = lumos::GetDataPath(fs::u8path("环境光遮蔽_龙_分块.png"));
+    fs::path exr_path_output = lumos::GetDataPath(fs::u8path("环境光遮蔽_龙_分块.exr"));
     remove_exist(png_path_output);
     remove_exist(exr_path_output);
     {
       int br = 200, bc = 300, bh = 108 * 2, bw = 192 * 2;
-      lumos::SaveExr(exr_path_output.c_str(), exr_image.rows(),
+      lumos::SaveExr(exr_path_output, exr_image.rows(),
                      exr_image.cols(), 200, 300,
                      exr_image.block(200, 300, bh, bw));
       lumos::SavePng(png_path_output,

@@ -11,7 +11,6 @@ add_imgui(
   IMGUI_DIR imgui
 )
 
-set(SPDLOG_ENABLE_PCH ON CACHE INTERNAL "")
 add_subdirectory(spdlog)
 
 # the INTERNAL just disable cmake-gui showing this
