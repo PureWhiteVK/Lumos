@@ -108,6 +108,7 @@ void MsaaFrameBuffer::Resize(int width, int height) {
 }
 
 void MsaaFrameBuffer::SetSamples(int msaa_samples) {
+  DEBUG("MsaaFrameBUffer::SetSamples {}, previous samples: {}",msaa_samples, m_samples);
   if (msaa_samples > m_max_samples) {
     DEBUG("Set msaa_samples to {}", m_max_samples);
     msaa_samples = m_max_samples;

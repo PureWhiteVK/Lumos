@@ -69,6 +69,8 @@ void ReadExr(const std::filesystem::path &input, T *output) {
 
 void SavePng(const std::filesystem::path &output, const ImageData4u8 &pic) {
   DEBUG("save png file: {}", output);
+  auto u8 = output.u8string();
+  auto p = std::filesystem::u8path(u8);
   int success =
       stbi_write_png(output.u8string().c_str(), pic.cols(), pic.rows(), 4, pic.data(), 0);
   if (!success) {

@@ -79,5 +79,6 @@ template <typename T> inline T Clamp(T value, T min, T max) {
 
 std::shared_ptr<spdlog::logger>
 SetupLogger(const std::vector<spdlog::sink_ptr> &sinks);
-std::filesystem::path GetDataPath(const std::filesystem::path &name);
+std::filesystem::path GetDataPath(const std::filesystem::path& path);
+std::filesystem::path GetDataPathUtf8(std::string_view name);
 }; // namespace lumos

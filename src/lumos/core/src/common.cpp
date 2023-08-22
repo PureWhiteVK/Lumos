@@ -29,9 +29,12 @@ SetupLogger(const std::vector<spdlog::sink_ptr> &sinks) {
 
 namespace fs = std::filesystem;
 
-fs::path GetDataPath(const fs::path &name) {
-  // to ensure cross platform (evil windows!!!)
+fs::path GetDataPath(const fs::path& path) {
   static fs::path data_path = fs::u8path(DATA_PATH);
-  return data_path / name;
+  return data_path / path;
+}
+
+fs::path GetDataPathUtf8(std::string_view name) {
+  return GetDataPath(std::filesystem::u8path(name));
 }
 } // namespace lumos

@@ -37,8 +37,8 @@ int main() {
     lumos::ImageData4h pic_4h = exr_image.unaryExpr(
         [](const lumos::Color4f &c) { return lumos::ToImfRgba(c); });
 
-    fs::path png_path_output = lumos::GetDataPath(fs::u8path("环境光遮蔽_龙_分块.png"));
-    fs::path exr_path_output = lumos::GetDataPath(fs::u8path("环境光遮蔽_龙_分块.exr"));
+    fs::path png_path_output = lumos::GetDataPathUtf8("环境光遮蔽_龙_分块.png");
+    fs::path exr_path_output = lumos::GetDataPathUtf8("环境光遮蔽_龙_分块.exr");
     remove_exist(png_path_output);
     remove_exist(exr_path_output);
     {

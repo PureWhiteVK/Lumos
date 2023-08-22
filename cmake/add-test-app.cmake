@@ -13,7 +13,7 @@ macro(add_testapp)
   target_link_libraries(${ARG_TARGET_NAME} PRIVATE 
     ${ARG_DEPENDENCIES}
   )
-  # only need on windows，但是还需要拷贝 debug 信息
+
   add_custom_command(TARGET ${ARG_TARGET_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${ARG_TARGET_NAME}> $<TARGET_RUNTIME_DLLS:${ARG_TARGET_NAME}>
     COMMAND_EXPAND_LISTS

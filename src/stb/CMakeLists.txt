@@ -4,10 +4,12 @@ add_library(stb::stb_image ALIAS stb_image)
 
 add_library(stb_image_write STATIC src/stb_image_write.c)
 target_include_directories(stb_image_write PUBLIC include)
-# if(WIN32)
-#     target_compile_definitions(stb_image_write PRIVATE -DSTBIW_WINDOWS_UTF8)
-# endif()
 add_library(stb::stb_image_write ALIAS stb_image_write)
+
+if(WIN32)
+    target_compile_definitions(stb_image PUBLIC -DSTBI_WINDOWS_UTF8)
+    target_compile_definitions(stb_image_write PUBLIC -DSTBIW_WINDOWS_UTF8)
+endif()
 
 # add_library(stb_image INTERFACE)
 # target_include_directories(stb_image INTERFACE include)

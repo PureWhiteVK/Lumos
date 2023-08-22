@@ -29,6 +29,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <nfd.hpp>
+#include <spdlog/fmt/ostr.h>
 
 namespace fs = std::filesystem;
 
@@ -64,14 +65,14 @@ int main() {
     
 
     auto on_image_button_click = [&]() {
-      // to ensure cross platform, we have to ensure usage of utf-8
-      static nfdu8char_t *out_path;
-      static std::array<nfdu8filteritem_t,2> filterItem{{{"Portable Network Graphics", "png"}, {"OpenEXR", "exr"}}};
+      // since std::filepath in windows only support utf-16, we can load the data with utf-16
+      static nfdnchar_t *out_path;
+      static std::array<nfdnfilteritem_t ,2> filterItem{{{L"Portable Network Graphics", L"png"}, {L"OpenEXR", L"exr"}}};
       nfdresult_t nfd_result = NFD::OpenDialog(out_path, filterItem.data(), 2);
       switch (nfd_result) {
       case NFD_OKAY:
-        DEBUG("user select path: {}", out_path);
-        preview_image_path = fs::path(out_path);
+        preview_image_path = out_path;
+        DEBUG("user select path: {}", preview_image_path.value());
         break;
       case NFD_ERROR:
         throw lumos::RuntimeError("NFD error: {}", NFD::GetError());
@@ -85,7 +86,7 @@ int main() {
       // should we use another thread to load image ?
       show_preview_window = true;
       // load image here
-      std::string ext = preview_image_path->extension().string();
+      std::string ext = preview_image_path->extension().u8string();
       DEBUG("image extension: {}", ext);
       if (image_loader_map.find(ext) == image_loader_map.end()) {
         throw lumos::RuntimeError("unsupported image extension: {}", ext);
