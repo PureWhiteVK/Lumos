@@ -1,4 +1,3 @@
-
 #include "lumos/core/common.h"
 #include "lumos/core/exception.h"
 #include "lumos/gui/common.h"

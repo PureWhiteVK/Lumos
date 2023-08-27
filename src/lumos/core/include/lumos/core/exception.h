@@ -2,9 +2,6 @@
 
 #include "common.h"
 #include <stdexcept>
-#include <spdlog/fmt/fmt.h>
-#include <spdlog/fmt/ostr.h>
-#include <spdlog/fmt/bundled/ranges.h>
 
 
 namespace lumos {

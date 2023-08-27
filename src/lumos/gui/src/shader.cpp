@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <spdlog/fmt/ostr.h>
 
 namespace lumos {
 namespace gui {
@@ -17,7 +18,7 @@ void DrawProgram::loadShaderFile(const std::filesystem::path &path,
     f.close();
     output = s.str();
   } catch (...) {
-     std::throw_with_nested( lumos::RuntimeError("failed to load shader file: {}",path.u8string()) );
+     std::throw_with_nested( lumos::RuntimeError("failed to load shader file: {}",path) );
   }
 }
 

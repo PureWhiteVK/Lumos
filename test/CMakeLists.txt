@@ -12,7 +12,7 @@ add_testapp(
   ENABLE_TEST 
   TARGET_NAME test_pcg
   SOURCES test_pcg.cpp
-  DEPENDENCIES pcg::pcg-cpp
+  DEPENDENCIES pcg::pcg_cpp
 )
 
 add_testapp(
@@ -31,12 +31,19 @@ add_testapp(
   TARGET_NAME test_random_permutation
   SOURCES test_random_permutation.cpp
   DEPENDENCIES lumos::lumos_core 
-               pcg::pcg-cpp
+               pcg::pcg_cpp
 )
 
-find_package(glm REQUIRED)
+include(FetchContent)
+FetchContent_Declare(
+  glm
+  GIT_REPOSITORY https://github.com/g-truc/glm.git
+  GIT_TAG        47585fde0c49fa77a2bf2fb1d2ead06999fd4b6e
+  GIT_SHALLOW    ON
+)
+FetchContent_Populate(glm)
+add_subdirectory(${glm_SOURCE_DIR} ${glm_BINARY_DIR})
 
-if(glm_FOUND)
 add_testapp(
   TARGET_NAME test_gl
   SOURCES test_gl.cpp
@@ -44,4 +51,3 @@ add_testapp(
                lumos::lumos_gui
                glm::glm
 )
-endif()

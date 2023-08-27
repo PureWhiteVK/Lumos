@@ -9,6 +9,7 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 #include <type_traits>
+#include <spdlog/fmt/ostr.h>
 
 namespace lumos {
 void ReadPng(const std::filesystem::path &input, ImageData4u8 *output) {

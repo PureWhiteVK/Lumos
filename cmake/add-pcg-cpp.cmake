@@ -1,24 +1,17 @@
-function(add_pcg_cpp)
-  set(options DYNAMIC)
-  set(one_value_args PCG_CPP_DIR)
-  set(multi_value_args "")
-  cmake_parse_arguments(ARGS "${options}" "${one_value_args}"
-                             "${multi_value_args}" ${ARGN} )
-  set(build_type STATIC)
-  if ( ARGS_DYNAMIC ) 
-    set(build_type DYNAMIC)
-  endif()
+function(add_pcg_cpp SRC_DIR BIN_DIR)
+  message(STATUS "add pcg_cpp [ INTERFACE ] with c++11")
 
-  message(STATUS "add pcg-cpp [ ${build_type} ]")
+  add_library(pcg_cpp INTERFACE)
+  target_include_directories(pcg_cpp INTERFACE ${SRC_DIR}/include)
 
-  add_library(pcg-cpp INTERFACE)
-  target_include_directories(pcg-cpp INTERFACE ${ARGS_PCG_CPP_DIR}/include)
-  set_property(TARGET pcg-cpp PROPERTY CXX_STANDARD 11)
-  set_property(TARGET pcg-cpp PROPERTY CXX_STANDARD_REQUIRED ON)
-  if(CMAKE_CXX_BYTE_ORDER STREQUAL "LITTLE_ENDIAN")
-    target_compile_definitions(pcg-cpp INTERFACE -DPCG_LITTLE_ENDIAN=1)
-  else()
-    target_compile_definitions(pcg-cpp INTERFACE -DPCG_LITTLE_ENDIAN=0)
-  endif()
-  add_library(pcg::pcg-cpp ALIAS pcg-cpp)
+  set_property(TARGET pcg_cpp PROPERTY RUNTIME_OUTPUT_DIRECTORY ${BIN_DIR})
+  set_property(TARGET pcg_cpp PROPERTY ARCHIVE_OUTPUT_DIRECTORY ${BIN_DIR})
+  set_property(TARGET pcg_cpp PROPERTY LIBRARY_OUTPUT_DIRECTORY ${BIN_DIR})
+  set_property(TARGET pcg_cpp PROPERTY PDB_OUTPUT_DIRECTORY     ${BIN_DIR})
+
+  set_property(TARGET pcg_cpp PROPERTY CXX_STANDARD 11)
+  set_property(TARGET pcg_cpp PROPERTY CXX_STANDARD_REQUIRED ON)
+
+  add_library(pcg::pcg_cpp ALIAS pcg_cpp)
+
 endfunction()
