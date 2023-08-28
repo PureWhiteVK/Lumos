@@ -119,6 +119,8 @@ add_Imath(${imath_SOURCE_DIR} ${imath_BINARY_DIR})
 
 function(add_zlib SRC_DIR BIN_DIR)
   add_subdirectory(${SRC_DIR} ${BIN_DIR})
+  include(CMakePrintHelpers)
+  cmake_print_variables(ZLIB_PUBLIC_HDRS)
   target_include_directories(zlibstatic PUBLIC ${zlib_BINARY_DIR} ${zlib_SOURCE_DIR})
   add_library(ZLIB::ZLIB ALIAS zlibstatic)
 endfunction(add_zlib)

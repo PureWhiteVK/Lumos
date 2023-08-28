@@ -5,9 +5,7 @@
 /build
 /log
 /bin
-/data/**
 !.gitkeep
-!/data/oberbilk.jpg
-!/data/dragon-ao.exr
-!/data/LXGWNeoXiHeiScreen.ttf
-!/data/test_gl
+*.png
+*.exr
+*.jpg

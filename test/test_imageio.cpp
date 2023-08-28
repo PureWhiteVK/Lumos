@@ -27,18 +27,23 @@ int main() {
         {std::make_shared<spdlog::sinks::stdout_color_sink_mt>()});
     spdlog::set_level(spdlog::level::debug);
     fs::path exr_path = lumos::GetDataPath("dragon-ao.exr");
+    fs::path output_path("test");
+    if(!fs::exists(output_path)) {
+      // if ensure parent, we should loop through all parent and check if parent directory is exist
+      fs::create_directory(output_path);
+    }
     lumos::ImageData4f exr_image;
     lumos::ReadExr<lumos::ImageData4f>(exr_path, &exr_image);
     DEBUG("exr_image(hxw): {}x{}", exr_image.rows(), exr_image.cols());
 
     lumos::ImageData4u8 png_image = exr_image.unaryExpr(
         [](auto c) { return lumos::ToUint8(lumos::ToSrgb(c)); });
-    lumos::SavePng(lumos::GetDataPath("dragon-ao.png"), png_image);
+    lumos::SavePng(output_path / "dragon-ao.png", png_image);
     lumos::ImageData4h pic_4h = exr_image.unaryExpr(
         [](const lumos::Color4f &c) { return lumos::ToImfRgba(c); });
 
-    fs::path png_path_output = lumos::GetDataPathUtf8("环境光遮蔽_龙_分块.png");
-    fs::path exr_path_output = lumos::GetDataPathUtf8("环境光遮蔽_龙_分块.exr");
+    fs::path png_path_output = output_path / fs::u8path("环境光遮蔽_龙_分块.png");
+    fs::path exr_path_output = output_path / fs::u8path("环境光遮蔽_龙_分块.exr");
     remove_exist(png_path_output);
     remove_exist(exr_path_output);
     {
